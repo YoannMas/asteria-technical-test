@@ -6,6 +6,7 @@ export const AppContent: React.FC = () => {
 
   return (
     <div style={{ padding: '20px' }}>
+      {/* We should add a loader in a real project */}
       {isLoading && <div>Loading...</div>}
       {data && <ProjectFlow project={data} />}
     </div>
