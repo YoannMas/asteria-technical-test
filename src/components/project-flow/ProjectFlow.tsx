@@ -25,10 +25,15 @@ import {
   CHALLENGE_TITLE_STYLE,
   MODEL_TITLE_STYLE,
 } from './ProjectFlow.constants';
+import { ChallengeNode } from './nodes/ChallengeNode';
 
 interface ProjectFlowProps {
   project: Project;
 }
+
+const nodeTypes = {
+  challenge: ChallengeNode,
+};
 
 const useProjectFlowNodes = (project: Project, windowWidth: number) => {
   return useMemo(() => {
@@ -98,10 +103,9 @@ const useProjectFlowNodes = (project: Project, windowWidth: number) => {
 
       nodes.push({
         id: `challenge-${challenge.id}`,
-        data: { label: challenge.name },
+        data: { label: challenge.name, challengeId: challenge.id, onAddModel: () => {} },
         position: { x: challengeX, y: challengeY },
-        type: 'default',
-        style: CHALLENGE_NODE_STYLE,
+        type: 'challenge',
       });
 
       edges.push({
@@ -156,6 +160,7 @@ export const ProjectFlow: React.FC<ProjectFlowProps> = ({ project }) => {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
         fitView
       >
         <Background />
