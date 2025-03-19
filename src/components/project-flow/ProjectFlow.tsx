@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -10,6 +10,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Project } from '../../types/projects.types';
+import { useWindowWidth } from '../../hooks/useWindowWidth';
 import {
   VERTICAL_SPACING,
   TITLE_Y,
@@ -29,13 +30,12 @@ interface ProjectFlowProps {
   project: Project;
 }
 
-const useProjectFlowNodes = (project: Project) => {
+const useProjectFlowNodes = (project: Project, windowWidth: number) => {
   return useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
     // Calculate column positions based on window width
-    const windowWidth = window.innerWidth;
     const projectX = windowWidth * PROJECT_X_PERCENTAGE;
     const challengeX = windowWidth * CHALLENGE_X_PERCENTAGE;
     const modelX = windowWidth * MODEL_X_PERCENTAGE;
@@ -135,16 +135,22 @@ const useProjectFlowNodes = (project: Project) => {
     });
 
     return { nodes, edges };
-  }, [project]);
+  }, [project, windowWidth]);
 };
 
 export const ProjectFlow: React.FC<ProjectFlowProps> = ({ project }) => {
-  const { nodes: initNodes, edges: initEdges } = useProjectFlowNodes(project);
+  const windowWidth = useWindowWidth();
+  const { nodes: initNodes, edges: initEdges } = useProjectFlowNodes(project, windowWidth);
   const [nodes, setNodes, onNodesChange] = useNodesState(initNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initEdges);
 
+  useEffect(() => {
+    setNodes(initNodes);
+    setEdges(initEdges);
+  }, [initNodes, initEdges]);
+
   return (
-    <div style={{ width: '100%', height: '800px' }}>
+    <div style={{ width: '100%', height: '90vh' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
