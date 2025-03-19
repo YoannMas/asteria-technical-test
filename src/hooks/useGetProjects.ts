@@ -16,6 +16,8 @@ export const useGetProjects = () => {
   const { data, isLoading } = useQuery({
     queryKey: PROJECTS_QUERY_KEY,
     queryFn: () => getProjects(),
+    // Don't refetch on window focus to avoid to lose the newly created biological model
+    refetchOnWindowFocus: false,
   });
 
   return { data, isLoading };

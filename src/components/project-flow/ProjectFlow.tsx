@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -19,13 +19,13 @@ import {
   CHALLENGE_X_PERCENTAGE,
   MODEL_X_PERCENTAGE,
   PROJECT_NODE_STYLE,
-  CHALLENGE_NODE_STYLE,
   MODEL_NODE_STYLE,
   PROJECT_TITLE_STYLE,
   CHALLENGE_TITLE_STYLE,
   MODEL_TITLE_STYLE,
 } from './ProjectFlow.constants';
 import { ChallengeNode } from './nodes/ChallengeNode';
+import { useAddBiologicalModel } from '../../hooks/useAddBiologicalModel';
 
 interface ProjectFlowProps {
   project: Project;
@@ -35,7 +35,11 @@ const nodeTypes = {
   challenge: ChallengeNode,
 };
 
-const useProjectFlowNodes = (project: Project, windowWidth: number) => {
+const useProjectFlowNodes = (
+  project: Project,
+  windowWidth: number,
+  onAddModel: (challengeId: number) => void
+) => {
   return useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
@@ -103,7 +107,7 @@ const useProjectFlowNodes = (project: Project, windowWidth: number) => {
 
       nodes.push({
         id: `challenge-${challenge.id}`,
-        data: { label: challenge.name, challengeId: challenge.id, onAddModel: () => {} },
+        data: { label: challenge.name, challengeId: challenge.id, onAddModel },
         position: { x: challengeX, y: challengeY },
         type: 'challenge',
       });
@@ -144,7 +148,26 @@ const useProjectFlowNodes = (project: Project, windowWidth: number) => {
 
 export const ProjectFlow: React.FC<ProjectFlowProps> = ({ project }) => {
   const windowWidth = useWindowWidth();
-  const { nodes: initNodes, edges: initEdges } = useProjectFlowNodes(project, windowWidth);
+  const { addBiologicalModel } = useAddBiologicalModel();
+
+  const handleAddModel = useCallback(
+    (challengeId: number) => {
+      // I didn't want to implement a component library only for this, so I'm using the native prompt
+      // Of course, in a real project, I would use a component library
+      const modelName = window.prompt('Enter the name of the new biological model:');
+      if (modelName) {
+        addBiologicalModel.mutate({ challengeId, name: modelName });
+      }
+    },
+    [addBiologicalModel]
+  );
+
+  const { nodes: initNodes, edges: initEdges } = useProjectFlowNodes(
+    project,
+    windowWidth,
+    handleAddModel
+  );
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initEdges);
 
